@@ -19,7 +19,6 @@ import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
-import java.util.Objects;
 
 public class BitmapUtils {
 
@@ -35,32 +34,27 @@ public class BitmapUtils {
 
     static Bitmap reSamplePic(Context context, String imagePath) {
 
-        try {
-            // Get device screen size information
-            DisplayMetrics metrics = new DisplayMetrics();
-            WindowManager manager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-            Objects.requireNonNull(manager).getDefaultDisplay().getMetrics(metrics);
+        // Get device screen size information
+        DisplayMetrics metrics = new DisplayMetrics();
+        WindowManager manager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        manager.getDefaultDisplay().getMetrics(metrics);
 
-            int targetH = metrics.heightPixels;
-            int targetW = metrics.widthPixels;
+        int targetH = metrics.heightPixels;
+        int targetW = metrics.widthPixels;
 
-            // Get the dimensions of the original bitmap
-            BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-            bmOptions.inJustDecodeBounds = true;
-            BitmapFactory.decodeFile(imagePath, bmOptions);
-            int photoW = bmOptions.outWidth;
-            int photoH = bmOptions.outHeight;
+        // Get the dimensions of the original bitmap
+        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+        bmOptions.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(imagePath, bmOptions);
+        int photoW = bmOptions.outWidth;
+        int photoH = bmOptions.outHeight;
 
-            // Determine how much to scale down the image
+        // Determine how much to scale down the image
+        int scaleFactor = Math.min(photoW / targetW, photoH / targetH);
 
-            int scaleFactor = Math.min(photoW / targetW, photoH / targetH);
-
-            // Decode the image file into a Bitmap sized to fill the View
-            bmOptions.inJustDecodeBounds = false;
-            bmOptions.inSampleSize = scaleFactor;
-        } catch (Exception e) {
-            Log.e("Error Bitmap", "Error en BitMapsUtils // " + e.getMessage());
-        }
+        // Decode the image file into a Bitmap sized to fill the View
+        bmOptions.inJustDecodeBounds = false;
+        bmOptions.inSampleSize = scaleFactor;
 
         return BitmapFactory.decodeFile(imagePath);
     }
@@ -72,7 +66,7 @@ public class BitmapUtils {
      * @throws IOException Thrown if there is an error creating the file
      */
 
-     static File createTempImageFile(Context context) throws IOException {
+    static File createTempImageFile(Context context) throws IOException {
         String timeStamp = new SimpleDateFormat("yyyy_MM_dd_HHmmss",
                 Locale.getDefault()).format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
@@ -159,6 +153,8 @@ public class BitmapUtils {
             galleryAddPic(context, savedImagePath);
             // Show a Toast with the save location
             String savedMessage = context.getString(R.string.saved_message, savedImagePath);
+            Toast.makeText(context, savedMessage, Toast.LENGTH_SHORT).show();
+
         }
         return savedImagePath;
     }
@@ -171,12 +167,11 @@ public class BitmapUtils {
      */
     static void shareImage(Context context, String imagePath) {
         // Create the share intent and start the share activity
-
         File imageFile = new File(imagePath);
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
         shareIntent.setType("image/*");
-        Uri photoUri = FileProvider.getUriForFile(context, FILE_PROVIDER_AUTHORITY, imageFile);
-        shareIntent.putExtra(Intent.EXTRA_STREAM, photoUri);
+        Uri photoURI = FileProvider.getUriForFile(context, FILE_PROVIDER_AUTHORITY, imageFile);
+        shareIntent.putExtra(Intent.EXTRA_STREAM, photoURI);
         context.startActivity(shareIntent);
     }
 

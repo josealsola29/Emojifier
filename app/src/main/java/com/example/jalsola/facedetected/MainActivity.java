@@ -25,6 +25,8 @@ import android.widget.Toast;
 import java.io.File;
 import java.io.IOException;
 
+import butterknife.BindView;
+
 public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_IMAGE_CAPTURE = 1;
@@ -159,7 +161,8 @@ public class MainActivity extends AppCompatActivity {
         mResultsBitmap = BitmapUtils.reSamplePic(this, mTempPhotoPath);
 
         // Detect the faces
-        Emojifier.detectFaces(this, mResultsBitmap);
+        mResultsBitmap
+                =Emojifier.detectFacesandOverlayEmoji(this,mResultsBitmap);
 
         // Set the new bitmap to the ImageView
         mImageView.setImageBitmap(mResultsBitmap);
